@@ -1,0 +1,11 @@
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+sqlalchemy==2.0.52
+psycopg2-binary>=2.9.10
+pydantic==2.13.5
+ortools==9.15.6755
+numpy==2.5.3
+pandas==3.0.5
+fastapi-azure-auth==5.1.1
+scikit-learn==1.7.2
+tzdata>=2024.1

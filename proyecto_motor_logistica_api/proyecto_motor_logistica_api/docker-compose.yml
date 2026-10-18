@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: zapato12
+      POSTGRES_DB: almacen_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:zapato12@db:5432/almacen_db
+      AZURE_TENANT_ID: "fea7c33e-0fa3-43f3-aeb6-d5d6a25c855c"
+      AZURE_API_CLIENT_ID: "1fc0a49f-ce9e-43c1-a35b-dea22b55d8c5"
+    ports:
+      - "8000:8000"
+
+volumes:
+  pgdata:

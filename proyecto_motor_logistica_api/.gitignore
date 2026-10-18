@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+env/
+.venv/
+
+# Visual Studio
+.vs/
+bin/
+obj/
+*.pyproj.user
+
+# Node
+node_modules/
+dist/
+
+# Variables de entorno
+.env

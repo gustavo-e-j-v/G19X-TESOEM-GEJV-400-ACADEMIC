@@ -1,0 +1,8 @@
+env/
+.vs/
+__pycache__/
+*.pyc
+.git/
+bin/
+obj/
+*.pyproj.user
