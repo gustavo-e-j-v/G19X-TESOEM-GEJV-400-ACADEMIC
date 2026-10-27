@@ -1,19 +1,20 @@
 import { useEffect, useState, useCallback } from "react";
-import { useMsal, useIsAuthenticated } from "@azure/msal-react";
+import { useAuth } from "./auth";
 import { fetchUbicaciones, optimizarRuta, fetchMensajesAgente } from "./api";
-import { loginRequest } from "./authConfig";
 import SelectionPanel from "./components/SelectionPanel";
 import ShelfGrid from "./components/ShelfGrid";
 import LoginGate from "./components/LoginGate";
 import RackModal from "./components/RackModal";
 import AgentPanel from "./components/AgentPanel";
+import AnalisisView from "./components/AnalisisView";
 import "./App.css";
 import "./paquetes.css";
+import "./analisis.css";
 
 export default function App() {
-  const isAuthenticated = useIsAuthenticated();
-  const { instance, accounts } = useMsal();
+  const { autenticado, usuario, local, obtenerToken, cerrarSesion } = useAuth();
 
+  const [vista, setVista] = useState("almacen"); // "almacen" | "analisis"
   const [ubicaciones, setUbicaciones] = useState([]);
   const [origenId, setOrigenId] = useState("");
   const [seleccionados, setSeleccionados] = useState([]);
@@ -30,16 +31,6 @@ export default function App() {
   const [agenteCargando, setAgenteCargando] = useState(false);
   const [agenteError, setAgenteError] = useState(null);
 
-  // Pide un token de acceso silenciosamente (sin volver a mostrar login si ya hay sesión).
-  const obtenerToken = useCallback(async () => {
-    const cuenta = accounts[0];
-    const respuesta = await instance.acquireTokenSilent({
-      ...loginRequest,
-      account: cuenta,
-    });
-    return respuesta.accessToken;
-  }, [instance, accounts]);
-
   const cargarAgente = useCallback(async () => {
     setAgenteCargando(true);
     try {
@@ -55,7 +46,7 @@ export default function App() {
 
   // Carga inicial de racks
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!autenticado) return;
     obtenerToken()
       .then((token) => fetchUbicaciones(token))
       .then((data) => {
@@ -64,12 +55,12 @@ export default function App() {
         setOrigenId(depot ? depot.id : data[0]?.id ?? "");
       })
       .catch((e) => setError(e.message));
-  }, [isAuthenticated, obtenerToken]);
+  }, [autenticado, obtenerToken]);
 
   // Mensajes del asistente: al entrar y cada vez que se cambia de rol
   useEffect(() => {
-    if (isAuthenticated) cargarAgente();
-  }, [isAuthenticated, cargarAgente]);
+    if (autenticado) cargarAgente();
+  }, [autenticado, cargarAgente]);
 
   // Después de agregar o eliminar un paquete: actualiza contadores y mensajes
   async function refrescarDatos() {
@@ -107,7 +98,7 @@ export default function App() {
     }
   }
 
-  if (!isAuthenticated) {
+  if (!autenticado) {
     return <LoginGate />;
   }
 
@@ -117,58 +108,91 @@ export default function App() {
 
   // Se busca el rack en la lista actual para que su contador se actualice en vivo
   const rackModal = rackAbierto ? ubicaciones.find((u) => u.id === rackAbierto) : null;
+  const enAlmacen = vista === "almacen";
 
   return (
     <>
-      <div className="app">
-        <SelectionPanel
-          ubicaciones={ubicaciones}
-          origenId={origenId}
-          setOrigenId={setOrigenId}
-          seleccionados={seleccionados}
-          onSubmit={handleSubmit}
-          cargando={cargando}
-        />
+      <div className={`app ${enAlmacen ? "" : "app-analisis"}`}>
+        {enAlmacen && (
+          <SelectionPanel
+            ubicaciones={ubicaciones}
+            origenId={origenId}
+            setOrigenId={setOrigenId}
+            seleccionados={seleccionados}
+            onSubmit={handleSubmit}
+            cargando={cargando}
+          />
+        )}
 
         <main className="main">
           <div className="topbar">
-            <span className="user-chip">{accounts[0]?.username}</span>
-            <button className="link-btn" onClick={() => instance.logoutRedirect()}>
-              Cerrar sesión
-            </button>
+            <nav className="tabs" aria-label="Vistas">
+              <button
+                type="button"
+                className={`tab ${enAlmacen ? "tab-activa" : ""}`}
+                onClick={() => setVista("almacen")}
+              >
+                Almacén
+              </button>
+              <button
+                type="button"
+                className={`tab ${!enAlmacen ? "tab-activa" : ""}`}
+                onClick={() => setVista("analisis")}
+              >
+                Análisis
+              </button>
+            </nav>
+            <div className="topbar-usuario">
+              {!local && <span className="user-chip">{usuario}</span>}
+              {local ? (
+                <span className="local-chip" title="La autenticación está desactivada (solo desarrollo local)">
+                  Modo local
+                </span>
+              ) : (
+                <button className="link-btn" onClick={cerrarSesion}>
+                  Cerrar sesión
+                </button>
+              )}
+            </div>
           </div>
 
           {error && <div className="error-banner">{error}</div>}
 
-          {resultado && (
-            <div className="stats-bar">
-              <div className="stat">
-                <span className="stat-value">{resultado.distancia_total_unidades}</span>
-                <span className="stat-label">unidades de distancia</span>
-              </div>
-              <div className="stat">
-                <span className="stat-value">{resultado.secuencia_optima.length - 2}</span>
-                <span className="stat-label">estantes visitados</span>
-              </div>
-            </div>
-          )}
+          {enAlmacen ? (
+            <>
+              {resultado && (
+                <div className="stats-bar">
+                  <div className="stat">
+                    <span className="stat-value">{resultado.distancia_total_unidades}</span>
+                    <span className="stat-label">unidades de distancia</span>
+                  </div>
+                  <div className="stat">
+                    <span className="stat-value">{resultado.secuencia_optima.length - 2}</span>
+                    <span className="stat-label">estantes visitados</span>
+                  </div>
+                </div>
+              )}
 
-          <div className="content-row">
-            <ShelfGrid
-              ubicaciones={ubicaciones}
-              seleccionados={seleccionados}
-              toggleRack={toggleRack}
-              ordenRuta={ordenRuta}
-              onInfo={(rack) => setRackAbierto(rack.id)}
-            />
-            <AgentPanel
-              rol={rol}
-              setRol={setRol}
-              datos={agente}
-              cargando={agenteCargando}
-              error={agenteError}
-            />
-          </div>
+              <div className="content-row">
+                <ShelfGrid
+                  ubicaciones={ubicaciones}
+                  seleccionados={seleccionados}
+                  toggleRack={toggleRack}
+                  ordenRuta={ordenRuta}
+                  onInfo={(rack) => setRackAbierto(rack.id)}
+                />
+                <AgentPanel
+                  rol={rol}
+                  setRol={setRol}
+                  datos={agente}
+                  cargando={agenteCargando}
+                  error={agenteError}
+                />
+              </div>
+            </>
+          ) : (
+            <AnalisisView obtenerToken={obtenerToken} />
+          )}
         </main>
       </div>
 

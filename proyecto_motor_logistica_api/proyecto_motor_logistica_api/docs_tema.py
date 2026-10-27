@@ -17,6 +17,8 @@ from html import escape
 
 from fastapi.openapi.docs import get_swagger_ui_html
 
+from config import AUTH_DISABLED
+
 FUENTES_HTML = (
     '<link rel="preconnect" href="https://fonts.googleapis.com">'
     '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
@@ -113,6 +115,13 @@ body {
   background: var(--accent);
   box-shadow: 0 0 0 3px rgba(48, 196, 201, 0.25);
 }
+.chip-warn {
+  margin-left: 8px;
+  border-color: rgba(239, 111, 97, 0.45);
+  background: rgba(239, 111, 97, 0.1);
+  color: #f3b3a8;
+}
+.chip-warn::before { background: var(--delete); box-shadow: 0 0 0 3px rgba(239, 111, 97, 0.25); }
 .hero h1 {
   margin: 16px 0 10px;
   font: 700 34px/1.15 var(--font);
@@ -545,11 +554,12 @@ def _encabezado(app) -> str:
     descripcion = escape(app.description or "")
     frontend = escape(os.getenv("FRONTEND_URL", "http://localhost:5173"))
     openapi = escape(app.openapi_url or "/openapi.json")
+    aviso_local = '<span class="chip chip-warn">Modo local · sin autenticación</span>' if AUTH_DISABLED else ""
     return f"""
 <header class="hero">
   <div class="hero-inner">
     <div class="hero-text">
-      <span class="chip">API REST · v{version}</span>
+      <span class="chip">API REST · v{version}</span>{aviso_local}
       <h1>{titulo}</h1>
       <p>{descripcion}</p>
     </div>

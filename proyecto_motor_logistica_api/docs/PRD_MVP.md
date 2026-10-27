@@ -4,10 +4,10 @@
 |---|---|
 | Producto | Motor de Optimización Logística de Almacenes |
 | Versión del documento | 1.0 |
-| Autor | [Nombre del residente] |
+| Autor | Gustavo Jiménez Valencia |
 | Asesor externo | [Nombre y puesto] |
 | Organización | PluriOne, S.A. de C.V. |
-| Estado del producto | Versión 0.7 estable + snapshots 0.8 (paquetes y asistente por rol) y 0.9 (rediseño de /docs), en validación |
+| Estado del producto | Versión 0.7 estable + snapshots 0.8 a 0.12 (paquetes, rediseño de /docs, seguridad y configuración, refactor con pruebas y vista de análisis), en validación |
 
 Este archivo tiene dos partes: la **Parte 1 (PRD)** define qué es el producto completo, y la **Parte 2 (MVP)** define la versión mínima que permite validarlo.
 
@@ -86,21 +86,23 @@ Las metas son **propuestas** y deben validarse con la empresa tras medir con dat
 | RF-09 | Marcar el rack como lleno al agregar un paquete y como vacío al eliminar el último | Media | En validación |
 | RF-10 | Asistente con mensajes y consejos distintos para encargado y empleado | Alta | En validación |
 | RF-11 | Mostrar la entrega más próxima y alertar paquetes vencidos, de hoy y de las próximas 48 h | Alta | En validación |
-| RF-12 | Clasificación ABC de racks por rotación | Media | Backend hecho; interfaz pendiente |
-| RF-13 | Predicción de demanda semanal por rack, con tendencia | Media | Backend hecho; interfaz pendiente |
-| RF-14 | Recomendaciones de reubicación (clase A lejos de la salida y rack vacío más cerca) | Media | Backend hecho; interfaz pendiente |
+| RF-12 | Clasificación ABC de racks por rotación (vista Análisis) | Media | En validación |
+| RF-13 | Predicción de demanda semanal por rack, con tendencia y gráfica (vista Análisis) | Media | En validación |
+| RF-14 | Recomendaciones de reubicación (clase A lejos de la salida y rack vacío más cerca), en la vista Análisis | Media | En validación |
 | RF-15 | Cargar historial de picking real (hoy es simulado) | Alta | Pendiente |
 | RF-16 | Roles reales (encargado/empleado) ligados a Entra ID | Media | Pendiente |
 | RF-17 | Mensajes redactados con un modelo de lenguaje (Azure OpenAI) | Baja | Planeado |
 | RF-18 | Rediseño visual de la API y de la página de paquetes (temas y colores) | Media | API en validación; página de paquetes planeada |
 | RF-19 | Dashboards de KPIs con Power BI | Baja | Planeado |
 | RF-20 | Pruebas y despliegue automáticos con GitHub Actions | Media | Planeado |
+| RF-21 | Ejecución local sin Entra ID (`AUTH_DISABLED`) para desarrollo y revisión | Media | En validación |
+| RF-22 | Configuración por variables de entorno (`.env`): contraseñas, identificadores de Entra ID, CORS y dirección de la API | Alta | En validación |
 
 ## 8. Requerimientos no funcionales
 
 | ID | Categoría | Requerimiento |
 |---|---|---|
-| RNF-01 | Seguridad | Todo endpoint exige un token válido de Entra ID; los IDs y secretos se pasan por variables de entorno |
+| RNF-01 | Seguridad | Todo endpoint exige un token válido de Entra ID (salvo en el modo local explícito); contraseñas e identificadores se leen de variables de entorno y no están en el código |
 | RNF-02 | Privacidad | El sistema no almacena contraseñas ni datos personales de los usuarios |
 | RNF-03 | Rendimiento | Respuesta de la ruta óptima en ≤ 2 s con hasta 20 racks (meta; falta medirla) |
 | RNF-04 | Portabilidad | Backend y base de datos empaquetados con Docker; arranque con `docker compose up` |
@@ -108,6 +110,8 @@ Las metas son **propuestas** y deben validarse con la empresa tras medir con dat
 | RNF-06 | Mantenibilidad | Separación en capas (interfaz, API, datos) y lógica de agentes en módulos propios |
 | RNF-07 | Fiabilidad de fechas | Las fechas se calculan con la hora de México (zona configurable con `APP_TIMEZONE`) |
 | RNF-08 | Escalabilidad | Diseño en contenedores listo para crecer; falta validarlo con carga real |
+| RNF-09 | Calidad | Pruebas automáticas con pytest (ruta óptima, clasificación ABC, predicción de demanda y API): 17 pruebas |
+| RNF-10 | Mantenibilidad | Backend dividido en módulos (`routers/`, `servicios/`, `schemas.py`, `config.py`), sin lógica duplicada |
 
 ## 9. Arquitectura y tecnologías
 
@@ -149,13 +153,14 @@ Arquitectura cliente-servidor en tres capas, comunicada por una API REST en JSON
 | Tema | Detalle | Mitigación |
 |---|---|---|
 | Datos simulados | La clasificación ABC y la predicción usan historial inventado | Cargar historial real antes de tomar decisiones con ellas |
-| Cuentas personales | Se activó `allow_guest_users=True` para poder iniciar sesión con una cuenta personal | En producción, restringir a cuentas de la organización |
-| Credenciales | La contraseña de la base de datos está escrita en `docker-compose.yml` | Moverla a un archivo `.env` o a secretos antes de producción |
-| CORS | Solo se permite `localhost:5173` | Agregar el dominio real al desplegar |
+| Cuentas personales | El acceso de cuentas personales o invitadas se controla con `AZURE_ALLOW_GUEST_USERS` (desactivado por defecto) | Activarlo solo en el tenant de pruebas; en producción usar cuentas de la organización |
+| Credenciales | La contraseña de ejemplo de las primeras versiones quedó en el historial de Git (era un valor de ejemplo que no se usa en ningún sistema) | Resuelto en 0.10: ya no está en el código, se lee de `.env`, que no se sube a Git |
+| CORS | Los orígenes permitidos se configuran con `CORS_ORIGINS` | Agregar el dominio real al desplegar |
 | Un solo recorrido | La ruta considera un surtidor y regresa al origen | Documentarlo; ampliar en una versión posterior |
 | PostgreSQL nativo | Un PostgreSQL instalado en Windows puede chocar con el puerto 5432 de Docker | Mantenerlo detenido o cambiar el puerto |
 | Costo de Azure | Azure OpenAI y Azure ML tienen costo por uso | Se dejaron fuera del MVP; hay un punto de integración listo |
 | Roles manuales | El rol del asistente se elige con un selector | Ligarlo a roles de Entra ID |
+| Modo local sin autenticación | `AUTH_DISABLED=true` deja la API sin validar tokens | Usarlo solo en local; la documentación de la API muestra un aviso visible cuando está activo |
 
 ## 13. Hoja de ruta
 
@@ -167,7 +172,10 @@ Arquitectura cliente-servidor en tres capas, comunicada por una API REST en JSON
 | 0.7 | Agente de recomendaciones de espacio | Hecho |
 | 0.8 | Paquetes por rack, ventana emergente y asistente por rol | En validación (snapshot) |
 | 0.9 | Rediseño de la documentación de la API (/docs) con paleta propia | En validación (snapshot) |
-| Después | Rediseño de la página de paquetes, historial real, interfaz para ABC y predicción | Planeado |
+| 0.10 | Seguridad y configuración: contraseñas y identificadores fuera del código, modo local | En validación (snapshot) |
+| 0.11 | Refactor del backend en módulos y pruebas con pytest | En validación (snapshot) |
+| 0.12 | Vista de análisis en la interfaz (ABC, predicción y recomendaciones) | En validación (snapshot) |
+| Después | Rediseño de la página de paquetes e historial de picking real | Planeado |
 | Más adelante | Roles con Entra ID, Azure OpenAI, GitHub Actions, Power BI | Planeado |
 
 ## 14. Preguntas abiertas
@@ -203,13 +211,14 @@ El MVP es la versión más pequeña que ya resuelve el problema central y permit
 | RF-03 | Selección de racks y ruta óptima | Hecho |
 | RF-05 a RF-09 | Registro de paquetes, contador por rack, ventana emergente y eliminación | En validación |
 | RF-10 y RF-11 | Asistente por rol y alertas de entrega más próxima | En validación |
+| RF-12 a RF-14 | Vista Análisis: clasificación ABC, predicción de demanda y recomendaciones de reubicación | En validación |
+| RF-21 y RF-22 | Ejecución local sin Entra ID y configuración por variables de entorno | En validación |
 | RNF-04 | Arranque con Docker Compose | Hecho |
 
 ## 4. Qué queda fuera del MVP
 
 | Funcionalidad | Motivo |
 |---|---|
-| Interfaz para ABC, predicción y recomendaciones (RF-12 a RF-14) | El backend ya existe y se puede consultar en `/docs`; la interfaz no es necesaria para validar las hipótesis |
 | Texto con Azure OpenAI (RF-17) | Tiene costo y las plantillas actuales bastan para validar |
 | Rediseño visual (RF-18) | Es de segunda prioridad; primero se valida la función |
 | Dashboards de Power BI (RF-19) | Aportan después de tener datos reales acumulados |
@@ -250,7 +259,9 @@ El MVP se considera validado cuando se cumple lo siguiente con datos y usuarios 
 
 - [x] Autenticación con Microsoft Entra ID
 - [x] Mapa por pasillos y ruta óptima
-- [x] Backend de ABC, predicción y recomendaciones
+- [x] Backend de ABC, predicción y recomendaciones, con pruebas automáticas (pytest)
+- [x] Contraseñas e identificadores fuera del código (archivos `.env`)
+- [x] Vista Análisis en la interfaz, probada de punta a punta en modo local
 - [x] Backend de paquetes y asistente probado de punta a punta con una base temporal
 - [ ] Validar paquetes, ventana emergente y asistente en el entorno real
 - [ ] Cargar datos reales de racks y paquetes

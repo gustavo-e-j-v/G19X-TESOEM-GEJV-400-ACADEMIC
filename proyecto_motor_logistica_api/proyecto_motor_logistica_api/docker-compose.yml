@@ -1,17 +1,19 @@
+# Las contraseñas y los identificadores NO van aquí: se leen del archivo .env
+# (copia .env.example como .env y completa los valores).
 services:
   db:
     image: postgres:16
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: zapato12
-      POSTGRES_DB: almacen_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD. Copia .env.example como .env y define la contraseña}
+      POSTGRES_DB: ${POSTGRES_DB:-almacen_db}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"   # solo accesible desde tu equipo
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-almacen_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,9 +25,17 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://postgres:zapato12@db:5432/almacen_db
-      AZURE_TENANT_ID: "fea7c33e-0fa3-43f3-aeb6-d5d6a25c855c"
-      AZURE_API_CLIENT_ID: "1fc0a49f-ce9e-43c1-a35b-dea22b55d8c5"
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD. Copia .env.example como .env y define la contraseña}
+      POSTGRES_DB: ${POSTGRES_DB:-almacen_db}
+      POSTGRES_HOST: db
+      AUTH_DISABLED: ${AUTH_DISABLED:-false}
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID:-}
+      AZURE_API_CLIENT_ID: ${AZURE_API_CLIENT_ID:-}
+      AZURE_ALLOW_GUEST_USERS: ${AZURE_ALLOW_GUEST_USERS:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      APP_TIMEZONE: ${APP_TIMEZONE:-America/Mexico_City}
     ports:
       - "8000:8000"
 

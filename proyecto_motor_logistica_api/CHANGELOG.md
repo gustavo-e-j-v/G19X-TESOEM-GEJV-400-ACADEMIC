@@ -67,17 +67,39 @@ Primera prueba de que el backend corre igual dentro de un contenedor.
 - Se conserva el botón Authorize con Microsoft y la página de retorno `/oauth2-redirect`.
 - Versión de la API: 1.3.1.
 
+## 0.10 — [Snapshot de prueba] Seguridad y configuración
+- La contraseña de la base de datos sale del código: `database.py` y `docker-compose.yml` la leen de `.env`; se agrega `.env.example` con valores de ejemplo.
+- `docker-compose.yml` ya no contiene valores sensibles: exige `POSTGRES_PASSWORD`, publica PostgreSQL solo en `127.0.0.1` y `.dockerignore` excluye el `.env` de la imagen.
+- Identificadores de Entra ID, CORS y zona horaria pasan a variables de entorno (`config.py`); `AZURE_ALLOW_GUEST_USERS` queda desactivado por defecto.
+- Frontend: identificadores de Entra ID y dirección de la API en variables `VITE_*` (`.env.example`), con una pantalla de aviso si falta configurarlas.
+- Modo local sin Entra ID: `AUTH_DISABLED=true` en el backend y `VITE_AUTH_DISABLED=true` en el frontend, solo para desarrollo o revisión.
+- README ampliado: configuración, guía para registrar las apps en Entra ID, modo local y declaración del uso de IA.
+
+## 0.11 — [Snapshot de prueba] Refactor del backend y pruebas
+- `main.py` dividido en `config.py`, `seguridad.py`, `schemas.py`, `servicios/` (ruta y demanda) y `routers/` (almacén, paquetes, análisis y asistente).
+- Eliminada la clasificación ABC duplicada: el endpoint usa `calcular_clasificacion_abc` de `agente_espacio.py`.
+- La ruta óptima valida la petición: al menos un destino, sin repetidos y sin el origen como destino.
+- La predicción devuelve la serie reciente y el pronóstico diario (para la gráfica) y ya no produce valores negativos.
+- 17 pruebas con pytest: ruta óptima (TSP), clasificación ABC, predicción de demanda y API.
+- Versión de la API: 1.4.0.
+
+## 0.12 — [Snapshot de prueba] Vista de análisis en la interfaz
+- Nueva pestaña **Análisis** (junto a **Almacén**) con la clasificación ABC, la predicción de demanda por rack con su gráfica y las recomendaciones de reubicación (RF-12 a RF-14).
+- Etiqueta "Modo local" visible cuando la autenticación está desactivada.
+
+**Sobre el historial de Git.** Las versiones 0.1 a 0.8 se desarrollaron en el equipo del autor antes de crear este repositorio y no existen como commits. El historial de Git empieza en el snapshot 0.9 (commit `6e69e40`). Desde la 0.10, cada avance es uno o varios commits.
+
 ---
 
 ## Pendiente
 
-## Siguiente — [Planeado] Rediseño del frontend
+### Siguiente — [Planeado] Rediseño del frontend
 Aplicar la paleta y el acomodo de la documentación de la API a la página de paquetes y al resto de la interfaz.
 
-## 1.0 — [Planeado] CI/CD con GitHub Actions
-Pruebas automáticas y reconstrucción de la imagen Docker en cada push.
+### 1.0 — [Planeado] CI/CD con GitHub Actions
+Pruebas automáticas (las de pytest) y reconstrucción de la imagen Docker en cada push.
 
-## 1.1 — [Planeado] Dashboards con Power BI
+### 1.1 — [Planeado] Dashboards con Power BI
 KPIs: distancia promedio de picking, productos más movidos, utilización de espacio.
 
-## 1.2 — [Planeado] Documentación técnica final y plan de soporte
+### 1.2 — [Planeado] Documentación técnica final y plan de soporte

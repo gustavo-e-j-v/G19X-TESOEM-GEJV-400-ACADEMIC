@@ -1,4 +1,5 @@
-const API_BASE = "http://127.0.0.1:8000";
+// Dirección de la API: se configura con VITE_API_BASE (ver .env.example)
+const API_BASE = (import.meta.env.VITE_API_BASE || "http://localhost:8000").replace(/\/$/, "");
 
 function authHeaders(token) {
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -66,4 +67,23 @@ export async function fetchMensajesAgente(rol, token) {
     headers: authHeaders(token),
   });
   return manejarRespuesta(res, "No se pudieron cargar los mensajes del asistente.");
+}
+
+// ---------- Análisis de inventario ----------
+
+export async function fetchAnalisisAbc(token) {
+  const res = await fetch(`${API_BASE}/api/v1/analisis-abc`, { headers: authHeaders(token) });
+  return manejarRespuesta(res, "No se pudo cargar la clasificación ABC.");
+}
+
+export async function fetchPrediccion(rackId, token) {
+  const res = await fetch(`${API_BASE}/api/v1/prediccion-demanda/${encodeURIComponent(rackId)}`, {
+    headers: authHeaders(token),
+  });
+  return manejarRespuesta(res, "No se pudo calcular la predicción de demanda.");
+}
+
+export async function fetchRecomendaciones(token) {
+  const res = await fetch(`${API_BASE}/api/v1/recomendaciones-espacio`, { headers: authHeaders(token) });
+  return manejarRespuesta(res, "No se pudieron cargar las recomendaciones de reubicación.");
 }

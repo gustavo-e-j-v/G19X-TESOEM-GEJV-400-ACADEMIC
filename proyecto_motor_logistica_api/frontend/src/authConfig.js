@@ -1,13 +1,32 @@
-// Identificadores de Microsoft Entra ID (Portal de Azure > Registros de aplicaciones).
-const TENANT_ID = "fea7c33e-0fa3-43f3-aeb6-d5d6a25c855c";
-const FRONTEND_CLIENT_ID = "252efc1d-84d8-4475-a175-195c16016f16";
-const API_CLIENT_ID = "1fc0a49f-ce9e-43c1-a35b-dea22b55d8c5";
+// Configuración de Microsoft Entra ID. Los identificadores se leen de variables
+// VITE_* (archivo .env del frontend, ver .env.example); no están escritos en el código.
+const env = import.meta.env;
+
+export const AUTH_DISABLED = env.VITE_AUTH_DISABLED === "true";
+
+const TENANT_ID = env.VITE_AZURE_TENANT_ID;
+const FRONTEND_CLIENT_ID = env.VITE_AZURE_FRONTEND_CLIENT_ID;
+const API_CLIENT_ID = env.VITE_AZURE_API_CLIENT_ID;
+const REDIRECT_URI = env.VITE_REDIRECT_URI || window.location.origin;
+
+// Vacío o todavía con el valor de ejemplo (todo ceros)
+const faltante = (valor) => !valor || /^[0-]+$/.test(valor);
+
+export const variablesFaltantes = AUTH_DISABLED
+  ? []
+  : [
+      ["VITE_AZURE_TENANT_ID", TENANT_ID],
+      ["VITE_AZURE_FRONTEND_CLIENT_ID", FRONTEND_CLIENT_ID],
+      ["VITE_AZURE_API_CLIENT_ID", API_CLIENT_ID],
+    ]
+      .filter(([, valor]) => faltante(valor))
+      .map(([nombre]) => nombre);
 
 export const msalConfig = {
   auth: {
     clientId: FRONTEND_CLIENT_ID,
     authority: `https://login.microsoftonline.com/${TENANT_ID}`,
-    redirectUri: "http://localhost:5173",
+    redirectUri: REDIRECT_URI,
   },
   cache: {
     cacheLocation: "sessionStorage",
@@ -15,7 +34,7 @@ export const msalConfig = {
   },
 };
 
-// El "scope" que le pedimos a Entra ID: permiso para llamar a nuestra propia API.
+// Permiso que se le pide a Entra ID: llamar a la API del backend
 export const loginRequest = {
   scopes: [`api://${API_CLIENT_ID}/access_as_user`],
 };

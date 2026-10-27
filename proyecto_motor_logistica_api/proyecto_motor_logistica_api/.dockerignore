@@ -1,8 +1,12 @@
 env/
+.venv/
 .vs/
 __pycache__/
 *.pyc
+.pytest_cache/
 .git/
 bin/
 obj/
 *.pyproj.user
+.env
+.env.local
