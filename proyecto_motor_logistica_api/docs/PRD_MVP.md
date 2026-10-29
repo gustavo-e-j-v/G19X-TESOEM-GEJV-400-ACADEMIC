@@ -5,7 +5,7 @@
 | Producto | Motor de Optimización Logística de Almacenes |
 | Versión del documento | 1.0 |
 | Autor | Gustavo Jiménez Valencia |
-| Asesor externo | [Nombre y puesto] |
+| Asesor externo | Edgar Loeffelmann/asesor empresarial |
 | Organización | PluriOne, S.A. de C.V. |
 | Estado del producto | Versión 0.7 estable + snapshots 0.8 a 0.12 (paquetes, rediseño de /docs, seguridad y configuración, refactor con pruebas y vista de análisis), en validación |
 
