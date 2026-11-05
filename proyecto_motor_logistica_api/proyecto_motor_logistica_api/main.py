@@ -53,7 +53,7 @@ DESCRIPCION = (
 
 app = FastAPI(
     title="Motor de Optimización Logística",
-    version="1.4.0",
+    version="1.5.0",
     description=DESCRIPCION,
     openapi_tags=ETIQUETAS,
     docs_url=None,  # /docs se sirve más abajo, con el tema propio (docs_tema.py)

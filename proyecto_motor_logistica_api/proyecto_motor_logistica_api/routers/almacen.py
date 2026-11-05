@@ -3,14 +3,24 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Security
+
+from agente_mensajes import hoy_local
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models import Paquete, UbicacionRack
 from routers.etiquetas import TAG_ALMACEN
-from schemas import PeticionPickingIDs, RespuestaRuta, UbicacionDTO
+from schemas import (
+    ConfirmarSurtidoDTO,
+    ItemSurtidoDTO,
+    PeticionPickingIDs,
+    RespuestaRuta,
+    RespuestaSurtidoDTO,
+    UbicacionDTO,
+)
 from seguridad import requerir_autenticacion
+from servicios.picking import RackNoEncontrado, RackNoSurtible, registrar_surtido
 from servicios.rutas import resolver_tsp
 
 router = APIRouter(prefix="/api/v1", tags=[TAG_ALMACEN], dependencies=[Security(requerir_autenticacion)])
@@ -68,3 +78,29 @@ def optimizar_ruta_desde_bd(peticion: PeticionPickingIDs, db: Session = Depends(
         raise HTTPException(status_code=500, detail=str(error))
 
     return RespuestaRuta(secuencia_optima=[puntos[i] for i in orden], distancia_total_unidades=distancia)
+
+
+@router.post("/picking/ruta-surtida", response_model=RespuestaSurtidoDTO, summary="Confirmar ruta surtida")
+def confirmar_ruta_surtida(datos: ConfirmarSurtidoDTO, db: Session = Depends(get_db)):
+    """Confirma que una ruta ya se surtió: suma las unidades recogidas de cada rack al historial de picking.
+
+    Con estos datos reales se calculan la clasificación ABC y la predicción de demanda.
+    Es todo o nada: si algún rack no existe, no se guarda nada.
+    """
+    hoy = hoy_local()
+    fecha = datos.fecha or hoy
+    if fecha > hoy:
+        raise HTTPException(status_code=400, detail="La fecha del surtido no puede ser futura.")
+    try:
+        registrado = registrar_surtido(db, [(i.rack_id, i.unidades) for i in datos.items], fecha)
+    except RackNoSurtible:
+        raise HTTPException(status_code=400, detail="El punto de salida (DEPOT) no se surte: registra solo racks.")
+    except RackNoEncontrado as error:
+        raise HTTPException(status_code=404, detail=f"Racks no encontrados: {', '.join(error.args[0])}.")
+
+    return RespuestaSurtidoDTO(
+        fecha=fecha,
+        racks_actualizados=len(registrado),
+        unidades_totales=sum(unidades for _, unidades in registrado),
+        detalle=[ItemSurtidoDTO(rack_id=rack_id, unidades=unidades) for rack_id, unidades in registrado],
+    )

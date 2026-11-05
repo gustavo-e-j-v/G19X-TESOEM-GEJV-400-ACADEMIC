@@ -59,6 +59,23 @@ class RespuestaRecomendacionesDTO(BaseModel):
     recomendaciones: List[RecomendacionEspacioDTO]
 
 
+class ItemSurtidoDTO(BaseModel):
+    rack_id: str
+    unidades: int = Field(..., ge=1, le=100000, description="Unidades recogidas en ese rack")
+
+
+class ConfirmarSurtidoDTO(BaseModel):
+    items: List[ItemSurtidoDTO] = Field(..., min_length=1, description="Racks surtidos y unidades de cada uno")
+    fecha: Optional[date] = Field(None, description="Día en que se surtió; por defecto, hoy")
+
+
+class RespuestaSurtidoDTO(BaseModel):
+    fecha: date
+    racks_actualizados: int
+    unidades_totales: int
+    detalle: List[ItemSurtidoDTO]
+
+
 class PaqueteCrearDTO(BaseModel):
     codigo: str = Field(..., min_length=1, max_length=60, description="Código o guía del paquete")
     descripcion: Optional[str] = Field(None, max_length=200)

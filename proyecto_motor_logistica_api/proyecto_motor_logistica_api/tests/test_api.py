@@ -15,7 +15,7 @@ def test_docs_y_esquema_openapi(client):
     assert [t["name"] for t in esquema["tags"]] == [
         "Almacén y rutas", "Paquetes", "Análisis de inventario", "Asistente",
     ]
-    assert sum(len(metodos) for metodos in esquema["paths"].values()) == 9
+    assert sum(len(metodos) for metodos in esquema["paths"].values()) == 10
 
 
 def test_ruta_optima_sale_y_regresa_al_origen(client, db):
