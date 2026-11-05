@@ -5,7 +5,7 @@ from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from database import SessionLocal
+from database import Base, SessionLocal, engine
 from models import UbicacionRack, HistorialPicking
 
 # Patrón de rotación por rack: (promedio diario, variación). Simula que unos
@@ -34,7 +34,9 @@ PATRONES_ROTACION = {
 DIAS_HISTORIAL = 90
 
 
-def poblar_historial():
+def poblar_historial() -> bool:
+    # La primera vez las tablas pueden no existir todavía (las crea la API al arrancar)
+    Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
         racks_existentes = {r.id for r in db.query(UbicacionRack.id).all()}
@@ -62,12 +64,14 @@ def poblar_historial():
 
         db.commit()
         print(f"¡Historial de picking poblado con éxito! ({registros_creados} registros nuevos)")
+        return True
     except Exception as e:
         db.rollback()
         print(f"Error al poblar el historial: {e}")
+        return False
     finally:
         db.close()
 
 
 if __name__ == "__main__":
-    poblar_historial()
+    sys.exit(0 if poblar_historial() else 1)

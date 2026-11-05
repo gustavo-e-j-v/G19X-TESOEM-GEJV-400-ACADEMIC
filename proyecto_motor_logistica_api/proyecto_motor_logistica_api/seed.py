@@ -3,10 +3,12 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from database import SessionLocal
+from database import Base, SessionLocal, engine
 from models import UbicacionRack
 
-def poblar_datos():
+def poblar_datos() -> bool:
+    # La primera vez las tablas pueden no existir todavía (las crea la API al arrancar)
+    Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
     # x = posición dentro del pasillo (columna), y = número de pasillo (fila)
@@ -50,11 +52,13 @@ def poblar_datos():
 
         db.commit()
         print("¡Base de datos poblada con éxito!")
+        return True
     except Exception as e:
         db.rollback()
         print(f"Error al poblar la base de datos: {e}")
+        return False
     finally:
         db.close()
 
 if __name__ == "__main__":
-    poblar_datos()
+    sys.exit(0 if poblar_datos() else 1)
