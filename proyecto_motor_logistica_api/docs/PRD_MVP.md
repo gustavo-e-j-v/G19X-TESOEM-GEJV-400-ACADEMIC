@@ -7,7 +7,7 @@
 | Autor | Gustavo Jiménez Valencia |
 | Asesor externo | [Nombre y puesto] |
 | Organización | PluriOne, S.A. de C.V. |
-| Estado del producto | Versión 0.7 estable + snapshots 0.8 a 0.12 (paquetes, rediseño de /docs, seguridad y configuración, refactor con pruebas y vista de análisis), en validación |
+| Estado del producto | Versión 0.7 estable + snapshots 0.8 a 0.14 (paquetes, rediseño de /docs, seguridad y configuración, refactor con pruebas, vista de análisis, instalación verificada y registro del picking real), en validación |
 
 Este archivo tiene dos partes: la **Parte 1 (PRD)** define qué es el producto completo, y la **Parte 2 (MVP)** define la versión mínima que permite validarlo.
 
@@ -89,7 +89,7 @@ Las metas son **propuestas** y deben validarse con la empresa tras medir con dat
 | RF-12 | Clasificación ABC de racks por rotación (vista Análisis) | Media | En validación |
 | RF-13 | Predicción de demanda semanal por rack, con tendencia y gráfica (vista Análisis) | Media | En validación |
 | RF-14 | Recomendaciones de reubicación (clase A lejos de la salida y rack vacío más cerca), en la vista Análisis | Media | En validación |
-| RF-15 | Cargar historial de picking real (hoy es simulado) | Alta | Pendiente |
+| RF-15 | Registrar el picking real: confirmar rutas surtidas (racks y unidades) con el botón «Ruta surtida», para alimentar la ABC y la predicción | Alta | En validación |
 | RF-16 | Roles reales (encargado/empleado) ligados a Entra ID | Media | Pendiente |
 | RF-17 | Mensajes redactados con un modelo de lenguaje (Azure OpenAI) | Baja | Planeado |
 | RF-18 | Rediseño visual de la API y de la página de paquetes (temas y colores) | Media | API en validación; página de paquetes planeada |
@@ -110,7 +110,7 @@ Las metas son **propuestas** y deben validarse con la empresa tras medir con dat
 | RNF-06 | Mantenibilidad | Separación en capas (interfaz, API, datos) y lógica de agentes en módulos propios |
 | RNF-07 | Fiabilidad de fechas | Las fechas se calculan con la hora de México (zona configurable con `APP_TIMEZONE`) |
 | RNF-08 | Escalabilidad | Diseño en contenedores listo para crecer; falta validarlo con carga real |
-| RNF-09 | Calidad | Pruebas automáticas con pytest (ruta óptima, clasificación ABC, predicción de demanda y API): 17 pruebas |
+| RNF-09 | Calidad | Pruebas automáticas con pytest (ruta óptima, clasificación ABC, predicción de demanda, picking real y API): 24 pruebas |
 | RNF-10 | Mantenibilidad | Backend dividido en módulos (`routers/`, `servicios/`, `schemas.py`, `config.py`), sin lógica duplicada |
 
 ## 9. Arquitectura y tecnologías
@@ -175,7 +175,9 @@ Arquitectura cliente-servidor en tres capas, comunicada por una API REST en JSON
 | 0.10 | Seguridad y configuración: contraseñas y identificadores fuera del código, modo local | En validación (snapshot) |
 | 0.11 | Refactor del backend en módulos y pruebas con pytest | En validación (snapshot) |
 | 0.12 | Vista de análisis en la interfaz (ABC, predicción y recomendaciones) | En validación (snapshot) |
-| Después | Rediseño de la página de paquetes e historial de picking real | Planeado |
+| 0.13 | Instalación verificada en carpeta limpia y correcciones | En validación (snapshot) |
+| 0.14 | Registro del picking real (botón «Ruta surtida») | En validación (snapshot) |
+| Después | Rediseño de la página de paquetes | Planeado |
 | Más adelante | Roles con Entra ID, Azure OpenAI, GitHub Actions, Power BI | Planeado |
 
 ## 14. Preguntas abiertas
@@ -212,6 +214,7 @@ El MVP es la versión más pequeña que ya resuelve el problema central y permit
 | RF-05 a RF-09 | Registro de paquetes, contador por rack, ventana emergente y eliminación | En validación |
 | RF-10 y RF-11 | Asistente por rol y alertas de entrega más próxima | En validación |
 | RF-12 a RF-14 | Vista Análisis: clasificación ABC, predicción de demanda y recomendaciones de reubicación | En validación |
+| RF-15 | Registro del picking real con «Ruta surtida» | En validación |
 | RF-21 y RF-22 | Ejecución local sin Entra ID y configuración por variables de entorno | En validación |
 | RNF-04 | Arranque con Docker Compose | Hecho |
 

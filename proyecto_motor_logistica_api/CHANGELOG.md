@@ -87,6 +87,20 @@ Primera prueba de que el backend corre igual dentro de un contenedor.
 - Nueva pestaña **Análisis** (junto a **Almacén**) con la clasificación ABC, la predicción de demanda por rack con su gráfica y las recomendaciones de reubicación (RF-12 a RF-14).
 - Etiqueta "Modo local" visible cuando la autenticación está desactivada.
 
+## 0.13 — [Snapshot de prueba] Instalación verificada en carpeta limpia
+- Se probó el README paso a paso en una carpeta limpia y en modo local (backend con PostgreSQL 16, `seed.py`, `seed_historial.py`, frontend y pruebas). La bitácora está en `docs/evidencias/`.
+- Corrección: `seed.py` y `seed_historial.py` crean las tablas si todavía no existen y terminan con código de salida 1 si fallan. Antes, si se ejecutaban antes de que la API terminara de arrancar, fallaban sin que el código de salida lo indicara.
+- Corrección: las plantillas `.env.example` quedan solo con caracteres ASCII, para evitar problemas de codificación al editarlas con Windows PowerShell.
+- README: nueva sección "Inicio rápido (modo local)" con los comandos exactos.
+- Nuevo script `docs/evidencias/probar_instalacion_docker.ps1` para repetir la prueba con Docker real y guardar su bitácora.
+
+## 0.14 — [Snapshot de prueba] Registro del picking real
+- Nuevo endpoint `POST /api/v1/picking/ruta-surtida`: confirma que una ruta se surtió (racks y unidades) y suma las unidades al historial de picking, una fila por rack y día. Es todo o nada: rechaza el punto de salida, los racks inexistentes y las fechas futuras.
+- Nuevo botón **Ruta surtida** en la pantalla Almacén (aparece al calcular una ruta), con una ventana para capturar las unidades recogidas en cada rack.
+- La clasificación ABC y la predicción de demanda ahora se alimentan con la operación real, no solo con `seed_historial.py`.
+- 7 pruebas nuevas (24 en total), entre ellas una que comprueba que la ABC y la predicción usan lo registrado.
+- Versión de la API: 1.5.0.
+
 **Sobre el historial de Git.** Las versiones 0.1 a 0.8 se desarrollaron en el equipo del autor antes de crear este repositorio y no existen como commits. El historial de Git empieza en el snapshot 0.9 (commit `6e69e40`). Desde la 0.10, cada avance es uno o varios commits.
 
 ---
