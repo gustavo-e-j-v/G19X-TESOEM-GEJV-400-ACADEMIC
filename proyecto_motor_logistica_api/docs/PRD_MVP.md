@@ -45,7 +45,7 @@ Las metas son **propuestas** y deben validarse con la empresa tras medir con dat
 | Tiempo de cálculo de ruta | Tiempo de respuesta de `POST /api/v1/optimizar-ruta-bd` | ≤ 2 s con hasta 20 racks |
 | Exactitud de alertas | % de paquetes vencidos o con entrega en ≤ 48 h que aparecen en los mensajes del asistente | 100% |
 | Cobertura de seguridad | % de endpoints que exigen token válido | 100% (hoy: 9 de 9) |
-| Adopción | % de paquetes del almacén registrados en el sistema | [Definir con la empresa] |
+| Adopción | % de paquetes del almacén registrados en el sistema | generar una aplicacion que ayude a la optimizacion de almacenes y su gestion |
 
 ## 5. Usuarios
 
