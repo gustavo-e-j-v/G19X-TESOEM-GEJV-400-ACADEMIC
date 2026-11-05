@@ -2,12 +2,13 @@
 
 Aplicación web que ayuda a operar un almacén con menos recorridos y mejor uso del espacio: calcula la ruta óptima de picking, registra los paquetes de cada rack con su fecha de entrega, analiza la rotación del inventario y da consejos al encargado y al empleado.
 
-Se desarrolló como proyecto de residencia profesional. Estado: **snapshots de prueba 0.8 a 0.12 sobre la versión 0.7 estable** (ver [CHANGELOG](CHANGELOG.md)).
+Se desarrolló como proyecto de residencia profesional. Estado: **snapshots de prueba 0.8 a 0.14 sobre la versión 0.7 estable** (ver [CHANGELOG](CHANGELOG.md)).
 
 ## Funcionalidades
 
 - **Mapa del almacén** por pasillos, con el estado de cada rack (lleno o vacío) y su número de paquetes.
 - **Ruta óptima de picking**: se eligen racks con un clic y se calcula el recorrido más corto (problema del agente viajero con OR-Tools y distancia Manhattan).
+- **Picking real**: el botón «Ruta surtida» confirma que una ruta ya se surtió (racks y unidades) y la guarda en el historial. Con esos datos reales se calculan la clasificación ABC y la predicción de demanda.
 - **Paquetes por rack**: ventana emergente para ver, agregar y eliminar paquetes con su fecha de entrega.
 - **Asistente por rol**: mensajes y consejos distintos para el empleado y el encargado (vencidos, de hoy, próximas 48 h) y la entrega más próxima.
 - **Vista de análisis**: clasificación ABC por rotación, predicción de demanda por rack (regresión lineal) y recomendaciones de reubicación.
@@ -47,6 +48,33 @@ proyecto_motor_logistica_api/
 - Docker Desktop
 - Node.js 20 o superior (versión LTS)
 - Opcional, para correr las pruebas fuera de Docker: Python 3.12
+
+## Inicio rápido (modo local, sin cuenta de Azure)
+
+Es el camino más corto para ver el proyecto funcionando. Necesitas Docker Desktop y Node.js. Los comandos son de PowerShell y se ejecutan desde la carpeta de este README.
+
+**Backend**
+
+```powershell
+cd proyecto_motor_logistica_api
+Copy-Item .env.example .env
+(Get-Content .env) -replace '^POSTGRES_PASSWORD=.*', 'POSTGRES_PASSWORD=mi-clave-local' -replace '^AUTH_DISABLED=.*', 'AUTH_DISABLED=true' | Set-Content .env
+docker compose up -d --build
+docker compose exec api python seed.py
+docker compose exec api python seed_historial.py
+```
+
+**Frontend** (en otra terminal, también desde la carpeta de este README)
+
+```powershell
+cd frontend
+Copy-Item .env.example .env
+(Get-Content .env) -replace '^VITE_AUTH_DISABLED=.*', 'VITE_AUTH_DISABLED=true' | Set-Content .env
+npm install
+npm run dev
+```
+
+Abre `http://localhost:5173` (aplicación) y `http://localhost:8000/docs` (documentación de la API). Más abajo están las pruebas, el detalle de cada variable y la versión con Microsoft Entra ID.
 
 ## Configuración
 
@@ -132,7 +160,7 @@ Se necesitan dos registros de aplicación en el [Portal de Azure](https://portal
 
 ## Pruebas
 
-Hay 17 pruebas con pytest sobre la ruta óptima (TSP), la clasificación ABC, la predicción de demanda y la API. Usan SQLite en memoria y no necesitan PostgreSQL ni Entra ID.
+Hay 24 pruebas con pytest sobre la ruta óptima (TSP), la clasificación ABC, la predicción de demanda, el registro del picking real y la API. Usan SQLite en memoria y no necesitan PostgreSQL ni Entra ID.
 
 Con Docker (sin instalar Python), en la carpeta del backend:
 
@@ -172,6 +200,8 @@ python -m pytest
 | 0.10 | Snapshot de prueba | Contraseñas e identificadores fuera del código, modo local |
 | 0.11 | Snapshot de prueba | Backend dividido en módulos y pruebas con pytest |
 | 0.12 | Snapshot de prueba | Vista de análisis en la interfaz |
+| 0.13 | Snapshot de prueba | Instalación verificada en carpeta limpia y correcciones |
+| 0.14 | Snapshot de prueba | Registro del picking real: botón «Ruta surtida» |
 
 El detalle de cada versión está en [CHANGELOG.md](CHANGELOG.md).
 
@@ -181,6 +211,7 @@ El detalle de cada versión está en [CHANGELOG.md](CHANGELOG.md).
 
 - [PRD y MVP](docs/PRD_MVP.md), también en Word: [PRD](docs/PRD_Motor_Logistica_Almacenes.doc) y [MVP](docs/MVP_Motor_Logistica_Almacenes.doc).
 - [Bitácora de construcción](docs/bitacora_proyecto.docx) (hasta la versión 0.7).
+- [Evidencias de la instalación en carpeta limpia](docs/evidencias/): bitácora de la prueba siguiendo solo este README y el script para repetirla con Docker.
 
 ## Uso de inteligencia artificial
 
