@@ -87,3 +87,15 @@ export async function fetchRecomendaciones(token) {
   const res = await fetch(`${API_BASE}/api/v1/recomendaciones-espacio`, { headers: authHeaders(token) });
   return manejarRespuesta(res, "No se pudieron cargar las recomendaciones de reubicación.");
 }
+
+// ---------- Picking real ----------
+
+// items: [{ rack_id, unidades }]. Suma las unidades al historial de picking.
+export async function registrarSurtido(items, token) {
+  const res = await fetch(`${API_BASE}/api/v1/picking/ruta-surtida`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify({ items }),
+  });
+  return manejarRespuesta(res, "No se pudo registrar la ruta surtida.");
+}

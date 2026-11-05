@@ -1,12 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "./auth";
-import { fetchUbicaciones, optimizarRuta, fetchMensajesAgente } from "./api";
+import { fetchUbicaciones, optimizarRuta, fetchMensajesAgente, registrarSurtido } from "./api";
 import SelectionPanel from "./components/SelectionPanel";
 import ShelfGrid from "./components/ShelfGrid";
 import LoginGate from "./components/LoginGate";
 import RackModal from "./components/RackModal";
 import AgentPanel from "./components/AgentPanel";
 import AnalisisView from "./components/AnalisisView";
+import SurtidoModal from "./components/SurtidoModal";
 import "./App.css";
 import "./paquetes.css";
 import "./analisis.css";
@@ -21,6 +22,8 @@ export default function App() {
   const [resultado, setResultado] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
+  const [surtidoAbierto, setSurtidoAbierto] = useState(false);
+  const [aviso, setAviso] = useState(null);
 
   // Ventana emergente de paquetes (guarda solo el id del rack abierto)
   const [rackAbierto, setRackAbierto] = useState(null);
@@ -98,6 +101,19 @@ export default function App() {
     }
   }
 
+  // Confirma que la ruta se surtió: guarda las unidades en el historial de picking
+  async function confirmarSurtido(items) {
+    const token = await obtenerToken();
+    const r = await registrarSurtido(items, token);
+    setSurtidoAbierto(false);
+    setSeleccionados([]);
+    setResultado(null);
+    setAviso(
+      `Ruta surtida registrada: ${r.unidades_totales} unidades en ${r.racks_actualizados} ` +
+        `${r.racks_actualizados === 1 ? "rack" : "racks"}. La clasificación ABC y la predicción ya usan estos datos.`
+    );
+  }
+
   if (!autenticado) {
     return <LoginGate />;
   }
@@ -157,6 +173,14 @@ export default function App() {
           </div>
 
           {error && <div className="error-banner">{error}</div>}
+          {aviso && (
+            <div className="ok-banner" role="status">
+              <span>{aviso}</span>
+              <button type="button" className="link-btn" onClick={() => setAviso(null)}>
+                Cerrar
+              </button>
+            </div>
+          )}
 
           {enAlmacen ? (
             <>
@@ -170,6 +194,9 @@ export default function App() {
                     <span className="stat-value">{resultado.secuencia_optima.length - 2}</span>
                     <span className="stat-label">estantes visitados</span>
                   </div>
+                  <button type="button" className="surtido-btn" onClick={() => setSurtidoAbierto(true)}>
+                    Ruta surtida
+                  </button>
                 </div>
               )}
 
@@ -202,6 +229,14 @@ export default function App() {
           obtenerToken={obtenerToken}
           onCerrar={cerrarModal}
           onCambio={refrescarDatos}
+        />
+      )}
+
+      {surtidoAbierto && resultado && (
+        <SurtidoModal
+          racks={resultado.secuencia_optima.slice(1, -1).map((s) => s.id)}
+          onCerrar={() => setSurtidoAbierto(false)}
+          onConfirmar={confirmarSurtido}
         />
       )}
     </>

@@ -160,3 +160,37 @@
   .clases, .kpis { grid-template-columns: minmax(0, 1fr); }
   .abc-fila { grid-template-columns: 84px 28px minmax(40px, 1fr) 52px 52px; gap: 6px; }
 }
+
+/* ---------- Ruta surtida ---------- */
+
+.stats-bar { align-items: center; }
+.surtido-btn {
+  margin-left: auto;
+  padding: 10px 20px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: #1b1d21;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.surtido-btn:hover { filter: brightness(1.08); }
+
+.ok-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: rgba(111, 207, 151, 0.12);
+  border: 1px solid rgba(111, 207, 151, 0.45);
+  border-radius: 6px;
+  color: #b9ebcf;
+  font-size: 14px;
+}
+
+.surtido-rack { flex: 1; }
+.surtido-campo { display: flex; align-items: center; gap: 10px; }
+.surtido-campo .input { width: 110px; }
