@@ -101,6 +101,12 @@ Primera prueba de que el backend corre igual dentro de un contenedor.
 - 7 pruebas nuevas (24 en total), entre ellas una que comprueba que la ABC y la predicción usan lo registrado.
 - Versión de la API: 1.5.0.
 
+## 0.15 — [Snapshot de prueba] Documentación para la evaluación
+- README de la raíz reescrito: título, descripción corta, inicio rápido en modo local y enlaces con la ruta completa. Ya no repite números de versión ni de pruebas: esos datos viven en este CHANGELOG.
+- Nueva sección «Limitaciones conocidas» en el README del proyecto (rol por `?rol=`, tablas con `create_all` sin migraciones, frontend sin pruebas automáticas, entre otras).
+- Meta medible para la métrica «Adopción» del PRD: al menos 90% de los paquetes registrados desde la segunda semana de uso.
+- La bitácora de la instalación limpia registra el commit probado en cada corrida, y el script de Docker imprime el commit que clona y la fila lista para pegar en la bitácora.
+
 **Sobre el historial de Git.** Las versiones 0.1 a 0.8 se desarrollaron en el equipo del autor antes de crear este repositorio y no existen como commits. El historial de Git empieza en el snapshot 0.9 (commit `6e69e40`). Desde la 0.10, cada avance es uno o varios commits.
 
 ---
