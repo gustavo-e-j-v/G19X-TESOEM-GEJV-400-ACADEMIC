@@ -17,6 +17,16 @@ El entorno donde se ejecutó **no tiene Docker**, así que `docker compose` no s
 
 **No se verificó aquí:** la construcción de la imagen, la red de Compose y el `healthcheck` de la base. Para eso está el script `probar_instalacion_docker.ps1` (en esta carpeta), que repite la prueba con Docker real en una máquina con Docker y guarda su propia bitácora como `instalacion_docker_<fecha>.txt`. Esa bitácora debe agregarse aquí cuando se ejecute.
 
+## Commit probado en cada prueba
+
+| Prueba | Fecha | Commit o etiqueta probado | Resultado | Evidencia |
+|---|---|---|---|---|
+| Corrida 1 (hallazgos), sin Docker | 2026-11-03 | Contenido equivalente al del commit `954f56f` (snapshot 0.12). Se probó una copia del contenido, no un clon | 1 hallazgo importante y 2 menores | Sección «Hallazgos» de esta bitácora |
+| Corrida 2 (con correcciones), sin Docker | 2026-11-03 | Contenido de la etiqueta `v0.14-snapshot` (se obtiene con `git rev-parse --short v0.14-snapshot`). Se probó una copia del contenido antes de hacer el commit | 36 de 36 pasos correctos | Tabla de la corrida 2 de esta bitácora |
+| Docker real (Windows y Docker Desktop) | Pendiente | Lo registra el script (línea «Commit probado») | Pendiente | `instalacion_docker_<fecha>.txt` |
+
+Para la prueba con Docker real, el script `probar_instalacion_docker.ps1` clona el repositorio, imprime el commit que clonó y al final muestra la fila lista para pegar en esta tabla.
+
 ## Entorno
 
 Linux 6.18.44-fc-v230 (contenedor de pruebas), Python 3.12.3, Node v22.22.2, npm 10.9.7, psql (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)
@@ -94,4 +104,4 @@ Vista de análisis con la clasificación ABC, la predicción y las recomendacion
 
 1. Detén tu propio proyecto si está corriendo (`docker compose down` en la carpeta del backend), porque usa los puertos 8000, 5173 y 5432.
 2. Desde esta carpeta (`docs\evidencias`), ejecuta `.\probar_instalacion_docker.ps1` (si Windows lo bloquea por venir de internet: `Unblock-File .\probar_instalacion_docker.ps1`).
-3. El script clona el repositorio en una carpeta temporal, sigue los pasos del README, borra sus propios contenedores al terminar y guarda `instalacion_docker_<fecha>.txt` aquí.
+3. El script clona el repositorio en una carpeta temporal, sigue los pasos del README, borra sus propios contenedores al terminar y guarda `instalacion_docker_<fecha>.txt` aquí. El archivo incluye el commit que se clonó y la fila lista para pegar en la tabla «Commit probado en cada prueba» de esta bitácora.

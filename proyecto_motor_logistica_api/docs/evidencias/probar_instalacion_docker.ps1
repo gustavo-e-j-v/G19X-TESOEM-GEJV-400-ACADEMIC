@@ -36,6 +36,9 @@ git --version
 
 Paso "1. Clonar en una carpeta limpia"
 git clone $Repo "$tmp\repo"
+$hash = (git -C "$tmp\repo" rev-parse --short HEAD)
+$etiqueta = (git -C "$tmp\repo" describe --tags --always)
+Write-Host "Commit probado: $hash ($etiqueta)" -ForegroundColor Cyan
 $back = "$tmp\repo\proyecto_motor_logistica_api\proyecto_motor_logistica_api"
 $front = "$tmp\repo\proyecto_motor_logistica_api\frontend"
 Verificar (Test-Path "$back\docker-compose.yml") "El repositorio trae el docker-compose.yml"
@@ -88,6 +91,10 @@ docker compose down -v
 Paso "Resumen"
 if ($fallas.Count -eq 0) { Write-Host "Todo OK" -ForegroundColor Green }
 else { Write-Host "Fallaron $($fallas.Count) comprobaciones:" -ForegroundColor Red; $fallas | ForEach-Object { Write-Host " - $_" } }
+Write-Host ""
+Write-Host "Fila para la bitácora (pégala en la tabla 'Commit probado en cada prueba'):"
+$resultado = if ($fallas.Count -eq 0) { "Todo OK" } else { "$($fallas.Count) fallas" }
+Write-Host "| Docker real (Windows y Docker Desktop) | $(Get-Date -Format 'yyyy-MM-dd') | $hash ($etiqueta) | $resultado | instalacion_docker_$fecha.txt |"
 Stop-Transcript | Out-Null
 
 $destino = Join-Path $inicio "instalacion_docker_$fecha.txt"
