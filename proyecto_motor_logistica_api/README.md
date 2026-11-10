@@ -2,7 +2,7 @@
 
 Aplicación web que ayuda a operar un almacén con menos recorridos y mejor uso del espacio: calcula la ruta óptima de picking, registra los paquetes de cada rack con su fecha de entrega, analiza la rotación del inventario y da consejos al encargado y al empleado.
 
-Se desarrolló como proyecto de residencia profesional. Estado: **snapshots de prueba 0.8 a 0.14 sobre la versión 0.7 estable** (ver [CHANGELOG](CHANGELOG.md)).
+Se desarrolló como proyecto de residencia profesional. Estado: **snapshots de prueba 0.8 a 0.15 sobre la versión 0.7 estable** (ver [CHANGELOG](CHANGELOG.md)).
 
 ## Funcionalidades
 
@@ -184,6 +184,15 @@ python -m pytest
 - Todos los endpoints exigen un token válido de Entra ID, salvo en el modo local explícito.
 - Una versión de ejemplo de las primeras entregas dejó una contraseña de pruebas en el historial de Git. Era un valor de ejemplo que no se usa en ningún sistema, y desde la versión 0.10 ya no está en el código.
 
+## Limitaciones conocidas
+
+- **El rol del asistente no sale del token.** El rol (empleado o encargado) se elige con el selector de la interfaz y llega a la API como `?rol=`; no se lee de los roles de aplicación de Microsoft Entra ID. Además, ningún endpoint distingue entre roles: cualquier usuario autenticado puede registrar o eliminar paquetes y confirmar rutas surtidas.
+- **Las tablas se crean con `create_all`, sin migraciones.** Al arrancar la API (y desde los seeds) SQLAlchemy crea las tablas que faltan, pero no modifica las que ya existen. Un cambio de columnas obliga a borrar el volumen de la base (`docker compose down -v`, se pierden los datos) o a alterar la tabla a mano. El siguiente paso sería usar Alembic.
+- **El frontend no tiene pruebas automáticas.** Solo se comprueba que compila (`npm run build`) y se recorre a mano en el navegador. La lógica del backend sí tiene pruebas con pytest.
+- **El historial inicial es simulado.** `seed_historial.py` genera 90 días de datos inventados. La clasificación ABC y la predicción reflejan la operación real conforme se registran rutas con «Ruta surtida».
+- **La ruta considera un solo surtidor** y regresa al origen; no hay capacidad por rack ni varios vehículos.
+- **La predicción es una regresión lineal simple**, sin estacionalidad.
+
 ## Historial de versiones
 
 | Versión | Tipo | Resumen |
@@ -202,6 +211,7 @@ python -m pytest
 | 0.12 | Snapshot de prueba | Vista de análisis en la interfaz |
 | 0.13 | Snapshot de prueba | Instalación verificada en carpeta limpia y correcciones |
 | 0.14 | Snapshot de prueba | Registro del picking real: botón «Ruta surtida» |
+| 0.15 | Snapshot de prueba | Documentación para la evaluación: README de la raíz, limitaciones conocidas y metas medibles |
 
 El detalle de cada versión está en [CHANGELOG.md](CHANGELOG.md).
 
