@@ -39,3 +39,27 @@ Abre `http://localhost:5173` (aplicación) y `http://localhost:8000/docs` (docum
 - [Evidencias de la instalación en carpeta limpia](proyecto_motor_logistica_api/docs/evidencias/)
 
 Este proyecto se desarrolló con apoyo de asistentes de inteligencia artificial; la declaración completa está en el README del proyecto.
+
+# Historial de Git
+
+| Commit | Etiqueta | Mensaje |
+|---|---|---|
+| `983390b` | | Merge branch 'main' de GitHub: README de la raiz y PRD |
+| `df5917b` | `v0.14-snapshot` | Actualizar CHANGELOG y PRD para las versiones 0.13 y 0.14 |
+| `a0c5cbf` | | Agregar el boton Ruta surtida y la ventana de captura |
+| `dafae13` | | Agregar el endpoint POST /api/v1/picking/ruta-surtida con sus pruebas |
+| `475369d` | `v0.13-snapshot` | Agregar la bitacora y capturas de la instalacion limpia |
+| `2d2c7ab` | | Agregar la seccion Inicio rapido (modo local) al README |
+| `c37b672` | | Dejar las plantillas .env.example solo con ASCII |
+| `08a1fb2` | | Corregir seed.py: crear tablas y terminar con codigo 1 si falla |
+| `d57e852` | | Update PRD_MVP.md |
+| `825e442` | | Add files via upload |
+| `f303a1a` | | Update PRD_MVP.md |
+| `b51c94c` | | Update PRD_MVP.md |
+| `95841f2` | | Ampliar el README de la raíz con enlaces al proyecto |
+| `bfb50cf` | `v0.12-snapshot` | Merge branch 'main' of https://github.com/gustavo-e-j-v/G19X-TESOEM-GEJV-400-ACADEMIC |
+| `954f56f` | | Agrega las correcciones faltantes del 3 corte |
+| `5934ce9` | | Update README.md |
+| `9009c9f` | | Update README.md |
+| `6e69e40` | `v0.9-snapshot` | Motor de optimización logística - snapshot 0.9 |
+| `4f076cc` | | Initial commit |
